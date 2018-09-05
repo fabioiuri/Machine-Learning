@@ -60,11 +60,12 @@ def get_sk_line(skperc):
 # Driver
 if __name__ == "__main__":
     # Generate points and plot them
-    random.seed(0)
-    D = generate_points(100)
-    fig = pylab.figure(figsize=(7,7))
-    mainplt = fig.add_subplot(111)
-    mainplt.set_title("Single Perceptron Binary Classifier (built vs sklearn convergence)")
+    random.seed(3)
+    D = generate_points(50)
+    fig, mainplt = pylab.subplots(figsize=(7,7))
+    pylab.ylim(Point.lo_lim, Point.up_lim)
+    pylab.xlim(Point.lo_lim, Point.up_lim)
+    mainplt.set_title("Single Perceptron Binary Classifier")
     mainplt.set_xlabel("x1")
     mainplt.set_ylabel("x2")
     #mainplt.plot([pt.x1 for pt in D], \
@@ -72,18 +73,18 @@ if __name__ == "__main__":
     #           "bo", label = "D = Sample data points")
     
     # Fix target function (unkown in real-life application)
-    f = lambda x: -0.3 * x + 35 # target function (hand picked)
+    f = lambda x: 1.1 * x + 71 # target function (hand picked)
     mainplt.plot([Point.lo_lim, Point.up_lim], \
                [f(Point.lo_lim), f(Point.up_lim)], \
                "grey", label = "f(x) = target function")
     mainplt.legend()
-    
+        
     # Calculate D points classification (positive or negative)
     # Positive points: Above target function
     # Negative points: Bellow target function
     posD, negD = classify_points(D, f)
-    mainplt.plot([pt.x1 for pt in posD], [pt.x2 for pt in posD], "bo")
-    mainplt.plot([pt.x1 for pt in negD], [pt.x2 for pt in negD], "rx")
+    mainplt.scatter([pt.x1 for pt in posD], [pt.x2 for pt in posD], c="b", marker="o")
+    mainplt.scatter([pt.x1 for pt in negD], [pt.x2 for pt in negD], c="r", marker="x")
     X = np.array([(pt.x1, pt.x2) for pt in posD + negD])
     y = np.array([1] * len(posD) + [-1] * len(negD))
     
@@ -92,7 +93,8 @@ if __name__ == "__main__":
     # (2) Fit perceptron using training dataset
     # (3) Test predictions using test dataset + plot g final hypothesis
     # Stage 1
-    perc = Perceptron(n_features=2)
+    perc = Perceptron(n_features=2, plot=mainplt, \
+                      plot_points=[Point.lo_lim, Point.up_lim])
     skperc = SKPerceptron(max_iter=10000)
     X_train, X_test, y_train, y_test = \
         train_test_split(X, y, test_size=0.2, random_state=1)
@@ -122,11 +124,12 @@ if __name__ == "__main__":
     g = lambda x: slope * x + x_intersect
     mainplt.plot([Point.lo_lim, Point.up_lim], \
                [g(Point.lo_lim), g(Point.up_lim)], \
-               "purple", label = "g(x) = final hypothesis by built perceptron")
+               "purple", label = "g(x) = final hypothesis by built")
     sk_slope, sk_x_intercept = get_sk_line(skperc)
     g2 = lambda x: sk_slope * x + sk_x_intercept
     mainplt.plot([Point.lo_lim, Point.up_lim], \
                [g2(Point.lo_lim), g2(Point.up_lim)], \
-               "green", label = "g'(x) = final hypothesis by built sklearn")
+               "green", label = "g'(x) = final hypothesis by sklearn")
+    mainplt.set_title("Single Perceptron Binary Classifier (built vs sklearn convergence)")
     mainplt.legend()
     fig.savefig('final_plot.png', dpi = 300)
