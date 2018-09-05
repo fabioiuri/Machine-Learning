@@ -9,7 +9,7 @@ import random
 class Perceptron:
     plot_image_dir = "iteration_plots.temp/"
     
-    def __init__(self, n_features, plot=None, plot_points=[]):
+    def __init__(self, n_features, plot=None, plot_points=[], gif_framerate=100):
         assert n_features == 2, \
                "Perceptron class is not ready for n_features != 2 (check get_line)"
         self.w = np.zeros(n_features+1)
@@ -17,19 +17,13 @@ class Perceptron:
         self.plot = plot
         self.plot_points = plot_points
         self.plot_names = []
+        self.gif_framerate = gif_framerate
         if plot != None and not os.path.exists(self.plot_image_dir):
             os.makedirs(self.plot_image_dir)
         
     def __str__(self):
         return ", ".join(["x" + str(i) + "=" + str(self.w[i]) \
                           for i in range(len(self.w))])
-        
-    # Auxiliary method to compute sign of val (assume sign = -1 when val = 0)
-    def sign(self, val):
-        if val > 0:
-            return 1
-        else:
-            return -1
     
     # Calculates the sum of the multiplications between weights and params
     def decision_function(self, X):
@@ -44,7 +38,7 @@ class Perceptron:
         classif = []
         scores = self.decision_function(X)
         for score in scores:
-            classif.append(self.sign(score))
+            classif.append(np.sign(score))
         return classif
     
     # Gets relative frequency of wrong predictions 
@@ -77,7 +71,9 @@ class Perceptron:
             self.w += _y * np.insert(x, 0, 1)
             if save_plots:
                 self.save_plot()
-        
+        if save_plots:
+            self.save_gif()
+            
     # Returns the slope and intersects needed to draw the model line
     def get_line(self):
         # TODO: generalize (only works for 2 features)
@@ -117,7 +113,7 @@ class Perceptron:
         images[0].save(name,
                        save_all=True,
                        append_images=images[1:],
-                       duration=70,
+                       duration=self.gif_framerate,
                        loop=0)
         print("Saved", name)
         

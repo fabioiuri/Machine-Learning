@@ -11,13 +11,13 @@ from sklearn.metrics import mean_absolute_error
 from perceptron import *
 
 class Point:
-    lo_lim = -100
-    up_lim = 100
+    lo_lim = -5
+    up_lim = 5
     
     def __init__(self, x1=None, x2=None):
         if x1 == None or x2 == None:
-            self.x1 = random.randint(self.lo_lim, self.up_lim)
-            self.x2 = random.randint(self.lo_lim, self.up_lim)
+            self.x1 = random.uniform(self.lo_lim, self.up_lim)
+            self.x2 = random.uniform(self.lo_lim, self.up_lim)
         else:
             self.x1 = x1
             self.x2 = x2            
@@ -31,24 +31,29 @@ class Point:
     def coords(self):
         return [self.x1, self.x2]
 
+# Generate random linearly seperable data (return target function)
 def generate_points(n):
-    points = []
+    xA,yA,xB,yB = [random.uniform(Point.lo_lim, Point.up_lim) for i in range(4)]
+    f = lambda x: (yB-yA)/(xB-xA)*x - (xB*yA-xA*yB)/(xA-xB)
+    w = np.array([xB*yA-xA*yB, yB-yA, xA-xB])
+    X = []
+    y = []
     for i in range(n):
-        points.append(Point())
-    return points
+        point = Point()
+        X.append(point.coords())
+        x = np.array([1] + point.coords())
+        y.append(int(np.sign(w.T.dot(x))))
+    return X, y, f
 
-def classify_points(D, f):
-    positiveD = []
-    negativeD = []
-    for pt in D:
-        x1, x2 = pt.x1, pt.x2
-        f_o = f(x1)
-        if x2 > f_o:
-            positiveD.append(pt)
-        else:
-            negativeD.append(pt)
-    return positiveD, negativeD
+# Check if y > 0 in [x,y]
+def isPositive(xy):
+    return xy[1] > 0
 
+# Check if y < 0 in [x,y]
+def isNegative(xy):
+    return xy[1] < 0
+
+# Get line params for tor the sklearn perceptron model (so we can plot it)
 def get_sk_line(skperc):
     assert isinstance(skperc, SKPerceptron),\
         "Wrong perceptron type (must be sklearn.linear_model.perceptron)"
@@ -59,33 +64,27 @@ def get_sk_line(skperc):
 
 # Driver
 if __name__ == "__main__":
-    # Generate points and plot them
-    random.seed(3)
-    D = generate_points(50)
+    # Generate random linearly separable points and plot target function
+    random.seed(0)
+    X, y, f = generate_points(40)
     fig, mainplt = pylab.subplots(figsize=(7,7))
     pylab.ylim(Point.lo_lim, Point.up_lim)
     pylab.xlim(Point.lo_lim, Point.up_lim)
     mainplt.set_title("Single Perceptron Binary Classifier")
     mainplt.set_xlabel("x1")
     mainplt.set_ylabel("x2")
-    #mainplt.plot([pt.x1 for pt in D], \
-    #           [pt.x2 for pt in D], \
-    #           "bo", label = "D = Sample data points")
-    
-    # Fix target function (unkown in real-life application)
-    f = lambda x: 1.1 * x + 71 # target function (hand picked)
     mainplt.plot([Point.lo_lim, Point.up_lim], \
                [f(Point.lo_lim), f(Point.up_lim)], \
                "grey", label = "f(x) = target function")
-    mainplt.legend()
         
-    # Calculate D points classification (positive or negative)
+    # Split points by category (positive or negative) and plot them
     # Positive points: Above target function
     # Negative points: Bellow target function
-    posD, negD = classify_points(D, f)
-    mainplt.scatter([pt.x1 for pt in posD], [pt.x2 for pt in posD], c="b", marker="o")
-    mainplt.scatter([pt.x1 for pt in negD], [pt.x2 for pt in negD], c="r", marker="x")
-    X = np.array([(pt.x1, pt.x2) for pt in posD + negD])
+    posD = list(map(lambda xy: xy[0], filter(isPositive, zip(X,y))))
+    negD = list(map(lambda xy: xy[0], filter(isNegative, zip(X,y))))
+    mainplt.scatter([pt[0] for pt in posD], [pt[1] for pt in posD], c="b", marker="o")
+    mainplt.scatter([pt[0] for pt in negD], [pt[1] for pt in negD], c="r", marker="x")
+    X = np.array([(pt[0], pt[1]) for pt in posD + negD])
     y = np.array([1] * len(posD) + [-1] * len(negD))
     
     # Start PLA (use built Perceptron vs. sklearn Perceptron)
@@ -93,7 +92,7 @@ if __name__ == "__main__":
     # (2) Fit perceptron using training dataset
     # (3) Test predictions using test dataset + plot g final hypothesis
     # Stage 1
-    perc = Perceptron(n_features=2, plot=mainplt, \
+    perc = Perceptron(n_features=2, plot=mainplt, gif_framerate=300, \
                       plot_points=[Point.lo_lim, Point.up_lim])
     skperc = SKPerceptron(max_iter=10000)
     X_train, X_test, y_train, y_test = \
