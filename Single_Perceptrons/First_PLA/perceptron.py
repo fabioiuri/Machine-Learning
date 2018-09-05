@@ -4,7 +4,7 @@ import numpy as np
 import pylab
 import os
 from PIL import Image
-from random import shuffle
+import random
 
 class Perceptron:
     plot_image_dir = "iteration_plots.temp/"
@@ -12,7 +12,7 @@ class Perceptron:
     def __init__(self, n_features, plot=None, plot_points=[]):
         assert n_features == 2, \
                "Perceptron class is not ready for n_features != 2 (check get_line)"
-        self.w = np.array([0] * (n_features+1))
+        self.w = np.zeros(n_features+1)
         self.iters = 0
         self.plot = plot
         self.plot_points = plot_points
@@ -24,7 +24,7 @@ class Perceptron:
         return ", ".join(["x" + str(i) + "=" + str(self.w[i]) \
                           for i in range(len(self.w))])
         
-    # Auxiliary method
+    # Auxiliary method to compute sign of val (assume sign = -1 when val = 0)
     def sign(self, val):
         if val > 0:
             return 1
@@ -35,7 +35,7 @@ class Perceptron:
     def decision_function(self, X):
         scores = []
         for x in X:
-            score = np.dot(self.w.T, np.insert(x, 0, 1))
+            score = np.dot(self.w.T, np.insert(x, 0, 1)) # add artificial x0 = 1
             scores.append(score)
         return scores
         
@@ -47,26 +47,38 @@ class Perceptron:
             classif.append(self.sign(score))
         return classif
     
+    # Gets relative frequency of wrong predictions 
+    def prediction_error(self, X, y):
+        M = len(X)
+        n_wrong = 0
+        for x, y in zip(X, y):
+            if self.predict([x])[0] != y:
+                n_wrong += 1
+        error = n_wrong / M
+        return error
+    
+    # Get random point among the misclassified
+    def choose_missclass_pt(self, X, y):
+        wrong_pts = []
+        for x, y in zip(X, y):
+            if self.predict([x])[0] != y:
+                wrong_pts.append((x, y))
+        return wrong_pts[random.randrange(0,len(wrong_pts))]
+    
+    # Fit the model to the given X, y dataset
     def fit(self, X, y):
-        changes = -1
-        print_plots = self.plot != None 
-        if print_plots:
+        save_plots = self.plot != None 
+        if save_plots:
             print("INFO: Perceptron is printing plots as it converges...")
-            self.print_plot()
-        while changes != 0:
-            changes = 0
+            self.save_plot()
+        while self.prediction_error(X, y) != 0:
             self.iters += 1
-            inputs_class = list(zip(X, y))
-            shuffle(inputs_class)
-            for x, _y in inputs_class:
-                if self.predict([x])[0] != _y:
-                    changes += 1
-                    self.w += _y * np.insert(x, 0, 1)
-            if print_plots:
-                self.print_plot()
-        if print_plots:
-            self.save_gif()
+            x, _y = self.choose_missclass_pt(X, y)
+            self.w += _y * np.insert(x, 0, 1)
+            if save_plots:
+                self.save_plot()
         
+    # Returns the slope and intersects needed to draw the model line
     def get_line(self):
         # TODO: generalize (only works for 2 features)
         if self.w[2] == 0:
@@ -75,7 +87,8 @@ class Perceptron:
         x_intersect = -self.w[0] / self.w[2]
         return slope, x_intersect
     
-    def print_plot(self):
+    # Saves plot of model's current state to plot_image_dir
+    def save_plot(self):
         assert self.plot != None, \
             "No plot object was given - can't print plots"
         slope, x_intersect = self.get_line()
@@ -89,6 +102,7 @@ class Perceptron:
         self.plot_names.append(name)
         self.plot.lines.pop()  # Delete last drawn line
         
+    # Saves gif of all plots used to fit the dataset
     def save_gif(self):
         assert type(self.plot_names) == list and len(self.plot_names) > 0, \
             "No plots to convert to gif"
