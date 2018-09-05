@@ -1,4 +1,5 @@
-# Simple perceptron binary classifier implementation
+# Simple perceptron implementation as binary classifier
+# Assumes data is always linearly seperable (does not rely on #iterations)
 
 import numpy as np
 import pylab

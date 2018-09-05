@@ -1,5 +1,5 @@
 # Perceptron Learning Algorithm 
-# Sample Usage and convergence test of perceptron on classification problem
+# Sample Usage and convergence test of perceptron using PLA
 # Compare results of built perceptron vs sklearn perceptron
 
 import random
@@ -31,7 +31,7 @@ class Point:
     def coords(self):
         return [self.x1, self.x2]
 
-# Generate random linearly seperable data (return target function)
+# Generate random linearly seperable data (and return target function)
 def generate_points(n):
     xA,yA,xB,yB = [random.uniform(Point.lo_lim, Point.up_lim) for i in range(4)]
     f = lambda x: (yB-yA)/(xB-xA)*x - (xB*yA-xA*yB)/(xA-xB)
