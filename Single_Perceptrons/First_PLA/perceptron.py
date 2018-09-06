@@ -81,15 +81,15 @@ class Perceptron:
         if self.w[2] == 0:
             return 0, 0
         slope = -self.w[1] / self.w[2]
-        x_intersect = -self.w[0] / self.w[2]
-        return slope, x_intersect
+        y_intercept = -self.w[0] / self.w[2]
+        return slope, y_intercept
     
     # Saves plot of model's current state to plot_image_dir
     def save_plot(self):
         assert self.plot != None, \
             "No plot object was given - can't print plots"
-        slope, x_intersect = self.get_line()
-        h = lambda x: slope * x + x_intersect
+        slope, y_intercept = self.get_line()
+        h = lambda x: slope * x + y_intercept
         self.plot.plot(self.plot_points, \
                    list(map(lambda x: h(x), self.plot_points)), \
                    "black", label = "h(x) = current hypothesis by built") 

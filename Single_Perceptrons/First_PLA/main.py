@@ -59,8 +59,8 @@ def get_sk_line(skperc):
         "Wrong perceptron type (must be sklearn.linear_model.perceptron)"
     w = skperc.coef_[0]
     slope = -w[0] / w[1]
-    x_intercept = -skperc.intercept_ / w[1]
-    return slope, x_intercept
+    y_intercept = -skperc.intercept_ / w[1]
+    return slope, y_intercept
 
 # Driver
 if __name__ == "__main__":
@@ -124,8 +124,8 @@ if __name__ == "__main__":
     mainplt.plot([Point.lo_lim, Point.up_lim], \
                [g(Point.lo_lim), g(Point.up_lim)], \
                "purple", label = "g(x) = final hypothesis by built")
-    sk_slope, sk_x_intercept = get_sk_line(skperc)
-    g2 = lambda x: sk_slope * x + sk_x_intercept
+    sk_slope, sk_y_intercept = get_sk_line(skperc)
+    g2 = lambda x: sk_slope * x + sk_y_intercept
     mainplt.plot([Point.lo_lim, Point.up_lim], \
                [g2(Point.lo_lim), g2(Point.up_lim)], \
                "green", label = "g'(x) = final hypothesis by sklearn")
