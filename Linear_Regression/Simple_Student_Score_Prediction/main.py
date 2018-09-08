@@ -7,6 +7,7 @@ import pylab as plt
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error
+from regressor import LinRegressor
 
 # 0. Read data
 dataset = pd.read_csv("studentscores.csv")
@@ -22,7 +23,8 @@ y =  dataset.dropna().iloc[ : , -1].values
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
 
 # 3. Fit regressor
-regressor = LinearRegression()
+regressor = LinRegressor() # Built linear regressor
+#regressor = LinearRegression() # Sklearn linear regressor
 regressor = regressor.fit(X, y)
 
 # 4. Make predictions
