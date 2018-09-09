@@ -87,8 +87,8 @@ if __name__ == "__main__":
     negD = list(map(lambda xy: xy[0], filter(isNegative, zip(X,y))))
     mainplt.scatter([pt[0] for pt in posD], [pt[1] for pt in posD], c="b", marker="o")
     mainplt.scatter([pt[0] for pt in negD], [pt[1] for pt in negD], c="r", marker="x")
-    X = np.array([(pt[0], pt[1]) for pt in posD + negD])
-    y = np.array([1] * len(posD) + [-1] * len(negD))
+    X = np.array(X)
+    y = np.array(y)
     
     # Start PLA (use built Perceptron vs. sklearn Perceptron)
     # (1) Split dataset into training and test datasets 80/20
