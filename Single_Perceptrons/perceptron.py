@@ -10,11 +10,13 @@ import random
 class Perceptron:
     plot_image_dir = "iteration_plots.temp/"
     
-    def __init__(self, n_features, plot=None, plot_points=[], gif_framerate=100):
+    def __init__(self, n_features, max_iters=100, plot=None, \
+                 plot_points=[], gif_framerate=100):
         assert n_features == 2, \
                "Perceptron class is not ready for n_features != 2 (check get_line)"
         self.w = np.zeros(n_features+1)
         self.iters = 0
+        self.max_iters = max_iters
         self.plot = plot
         self.plot_points = plot_points
         self.plot_names = []
@@ -66,7 +68,7 @@ class Perceptron:
         if save_plots:
             print("INFO: Perceptron is printing plots as it converges...")
             self.save_plot()
-        while self.prediction_error(X, y) != 0:
+        while self.prediction_error(X, y) != 0 and self.iters < self.max_iters:
             self.iters += 1
             x, _y = self.choose_missclass_pt(X, y)
             self.w += _y * np.insert(x, 0, 1)
