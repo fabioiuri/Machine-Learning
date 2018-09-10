@@ -77,6 +77,7 @@ if __name__ == "__main__":
     mainplt.scatter([pt[0] for pt in negD], [pt[1] for pt in negD], c="r", marker="x")
     X = np.array(X)
     y = np.array(y)
+    fig.savefig('original_plot.png', dpi = 300)
     
     # Non Linear Transformation (phi)
     phi = lambda xs: list(np.array(xs)**2)
