@@ -65,6 +65,13 @@ def get_sk_line(skperc):
     y_intercept = -skperc.intercept_ / w[1]
     return slope, y_intercept
 
+# Test #iterations to converge using a dataset of size N
+def test_iters(N):
+    X, y, _ = generate_points(N)
+    perc = Perceptron(n_features=2, max_iters=100000)
+    perc.fit(X, y)
+    return perc.iters
+    
 # Driver
 if __name__ == "__main__":
     # Generate random linearly separable points and plot target function
@@ -95,7 +102,7 @@ if __name__ == "__main__":
     # (2) Fit perceptron using training dataset
     # (3) Test predictions using test dataset + plot g final hypothesis
     # Stage 1
-    perc = Perceptron(n_features=2, plot=mainplt, gif_framerate=300, \
+    perc = Perceptron(n_features=2, plot=None, gif_framerate=300, \
                       plot_points=[Point.lo_lim, Point.up_lim])
     skperc = SKPerceptron(max_iter=10000)
     X_train, X_test, y_train, y_test = \
@@ -121,7 +128,7 @@ if __name__ == "__main__":
     sk_out_sample_score = mean_absolute_error(y_test, sk_predicted_out_sample)
     print("Out of Sample Score (sklearn):", sk_out_sample_score)
 
-    # PLot g and g'
+    # Plot g and g'
     slope, x_intersect = perc.get_line()
     g = lambda x: slope * x + x_intersect
     mainplt.plot([Point.lo_lim, Point.up_lim], \
@@ -135,3 +142,21 @@ if __name__ == "__main__":
     mainplt.set_title("Single Perceptron Binary Classifier (built vs sklearn convergence)")
     mainplt.legend()
     fig.savefig('final_plot.png', dpi = 300)
+    
+    # Test multiple dataset sizes (N) in multiple conditions
+    Ns = [10, 50, 100, 200, 350, 500, 750, 1000]
+    random_seeds = [0, 1, 2, 3, 4, 5]
+    results = np.zeros(len(Ns))
+    for seed in random_seeds:
+        print("Testing iterations on random seed", seed)
+        random.seed(seed)
+        for i in range(len(Ns)):
+            results[i] += test_iters(Ns[i])
+    results = results / len(random_seeds)
+    print(results)
+    fig, itersplot = pylab.subplots(figsize=(7,7))
+    itersplot.bar(Ns, results, width=30)
+    itersplot.set_xlabel("|D| : Dataset size")
+    itersplot.set_ylabel("Number of Iterations")
+    fig.savefig('iterations_bar_plot.png', dpi = 300)
+    
