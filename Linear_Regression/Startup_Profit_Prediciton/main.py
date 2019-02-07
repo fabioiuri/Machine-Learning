@@ -24,13 +24,13 @@ X = one_hot_encoder_state.fit_transform(X).toarray()
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)
 
 # 3. Fit model
-multi_regressor = LinearRegression()
-multi_regressor = multi_regressor.fit(X_train, y_train)
+lin_reg = LinearRegression()
+lin_reg = lin_reg.fit(X_train, y_train)
 
 # 4. Make predictions
-in_sample_score = mean_absolute_error(y_train, multi_regressor.predict(X_train))
-out_sample_score = mean_absolute_error(y_test, multi_regressor.predict(X_test))
+in_sample_score = mean_absolute_error(y_train, lin_reg.predict(X_train))
+out_sample_score = mean_absolute_error(y_test, lin_reg.predict(X_test))
 print("in_sample_score", in_sample_score)
 print("out_sample_score", out_sample_score)
 print("Predictions for test set:")
-print(multi_regressor.predict(X_test))
+print(lin_reg.predict(X_test))
