@@ -5,13 +5,12 @@ import numpy as np
 from sklearn.linear_model import Perceptron
 
 iris = datasets.load_iris()
-X = iris.data[:, :]
+X = iris.data
 y = iris.target
 
 ### Try using raw data
-X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y,
-                                                    random_state=42)
-ppn = Perceptron(max_iter=100, eta0=0.1, random_state=1)
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
+ppn = Perceptron(max_iter=1000, tol=1e-5, eta0=0.01, random_state=1)
 ppn.fit(X_train, y_train)
 print("============================================")
 print("WITHOUT PCA")
@@ -38,7 +37,7 @@ eig_pairs = [(np.abs(eig_vals[i]), eig_vecs[:,i]) for i in range(len(eig_vals))]
 
 # Sort the (eigenvalue, eigenvector) tuples from high to low
 eig_pairs.sort(key=lambda x: x[0], reverse=True)
-print("eig_pairs", eig_pairs)
+#print("eig_pairs", eig_pairs)
 
 
 # Only keep a certain number of eigen vectors based on 
@@ -48,10 +47,10 @@ print("eig_pairs", eig_pairs)
 exp_var_percentage = 97 # Threshold of 97% explained variance
 
 tot = sum(eig_vals)
-var_exp = [(i / tot)*100 for i in sorted(eig_vals, reverse=True)]
+var_exp = [(i / tot)*100 for i in map(lambda x: x[0], eig_pairs)]
 cum_var_exp = np.cumsum(var_exp)
-print("var_exp", var_exp)
-print("cum_var_exp", cum_var_exp)
+print("Explained var ratio:", var_exp)
+print("Acummulative explained var ratio:", cum_var_exp)
 
 num_vec_to_keep = 0
 
@@ -71,12 +70,12 @@ pca_data = X.dot(proj_mat)
 #print("Projected data", pca_data)
 
 # Now learn perceptron on projected data
-X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y,
-                                                    random_state=42)
-ppn = Perceptron(max_iter=100, eta0=0.1, random_state=1)
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=1)
+ppn = Perceptron(max_iter=1000, tol=1e-5, eta0=0.01, random_state=1)
 ppn.fit(X_train, y_train)
 print("============================================")
 print("WITH PCA")
+print("--> From", num_features, "dimensions to", num_vec_to_keep)
 print("--> Accuracy on training set:",  ppn.score(X_train, y_train))
 print("--> Accuracy on test set:",  ppn.score(X_test, y_test))
 print("============================================")
